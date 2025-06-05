@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeMaster - Typing Practice for Kids & Teens</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                    }
+                }
+            },
+            darkMode: 'class',
+        }
+    </script>
+</head>
+
+<body class="bg-white dark:bg-gray-900 transition-colors duration-200">
+    <div class="min-h-screen flex flex-col px-4 sm:px-6 lg:px-8 py-8 max-w-4xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-2">TypeMaster</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300">Learn to type with fun practice!</p>
+        </header>
+
+        <main class="flex-grow flex flex-col">
+            <div class="mb-6 flex flex-col sm:flex-row gap-4 justify-center">
+                <button id="wordsBtn"
+                    class="px-6 py-3 bg-primary text-white rounded-lg font-medium shadow-md hover:bg-opacity-90 transition">
+                    Words Mode
+                </button>
+                <button id="sentencesBtn"
+                    class="px-6 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-white border border-gray-300 dark:border-gray-700 rounded-lg font-medium shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                    Sentences Mode
+                </button>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Type the text below:</h2>
+                    <div class="flex items-center">
+                        <span class="text-gray-600 dark:text-gray-300 mr-2">Time:</span>
+                        <span id="timer" class="font-mono text-lg font-bold text-primary">0.0s</span>
+                    </div>
+                </div>
+
+                <div id="textToType"
+                    class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 mb-4 text-lg leading-relaxed text-gray-800 dark:text-gray-200 min-h-[100px]">
+                    Select a mode to start typing practice!
+                </div>
+
+                <textarea id="userInput"
+                    class="w-full rounded-lg border border-gray-300 dark:border-gray-700 p-4 text-base text-gray-800 dark:text-white bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-primary transition disabled:opacity-60 min-h-[100px]"
+                    placeholder="Start typing here..." disabled></textarea>
+            </div>
+
+            <div id="results" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 hidden">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Results</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                        <p class="text-gray-600 dark:text-gray-400 mb-1">Time taken:</p>
+                        <p id="completionTime" class="text-2xl font-bold text-primary">0.0s</p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                        <p class="text-gray-600 dark:text-gray-400 mb-1">Accuracy:</p>
+                        <p id="accuracy" class="text-2xl font-bold text-primary">0%</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center mt-6">
+                <button id="resetBtn"
+                    class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg font-medium shadow-md hover:bg-gray-300 dark:hover:bg-gray-600 transition hidden">
+                    Try Again
+                </button>
+            </div>
+        </main>
+
+        <footer class="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+            <p>Select a difficulty level:</p>
+            <div class="flex justify-center gap-2 mt-2">
+                <button id="easyBtn"
+                    class="px-3 py-1 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">Easy</button>
+                <button id="mediumBtn"
+                    class="px-3 py-1 rounded border border-gray-300 dark:border-gray-700 bg-primary bg-opacity-10 font-semibold text-primary">Medium</button>
+                <button id="hardBtn"
+                    class="px-3 py-1 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">Hard</button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Check for dark mode preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Word and sentence lists
+        const words = {
+            easy: ["cat", "dog", "sun", "fun", "run", "hat", "bat", "cup", "big", "red", "blue", "green", "jump", "play", "book", "good", "bad", "mom", "dad", "love"],
+            medium: ["animal", "letter", "number", "window", "picture", "computer", "keyboard", "student", "teacher", "school", "calendar", "science", "history", "library", "planet", "mountain", "rainbow", "elephant", "dinosaur", "birthday"],
+            hard: ["dictionary", "calculator", "imagination", "adventure", "information", "technology", "education", "celebration", "communication", "transportation", "understanding", "responsibility", "environment", "community", "opportunity", "vocabulary", "development", "excitement", "creativity", "experience"]
+        };
+
+        const sentences = {
+            easy: [
+                "The cat sat on the mat.",
+                "I like to play with my dog.",
+                "The sun is very bright today.",
+                "Please pass me the blue cup.",
+                "My mom made cookies for us.",
+                "We went to the park yesterday.",
+                "The red ball rolled down the hill.",
+                "My teacher reads us a story every day.",
+                "I can count to one hundred.",
+                "Birds fly high in the sky."
+            ],
+            medium: [
+                "The curious monkey swung from tree to tree in the jungle.",
+                "My favorite subject in school is science because we do cool experiments.",
+                "The astronaut took pictures of Earth from the space station.",
+                "Many animals in the rainforest are endangered because of deforestation.",
+                "The ancient pyramid was discovered by archaeologists last year.",
+                "Reading books helps us learn new words and visit imaginary places.",
+                "The museum has a new exhibit about dinosaurs that lived millions of years ago.",
+                "The robot can be programmed to perform different tasks automatically.",
+                "During the storm, we lost electricity and had to use flashlights.",
+                "The pizza was topped with cheese, mushrooms, and pepperoni."
+            ],
+            hard: [
+                "The extraordinary archaeological discovery revealed fascinating insights into ancient civilizations that had previously been shrouded in mystery.",
+                "Scientists are developing innovative technological solutions to address the complex environmental challenges facing our planet.",
+                "The distinguished professor published a comprehensive analysis of economic trends and their implications for international trade relations.",
+                "The spacecraft's sophisticated instruments collected valuable data about the distant planet's atmospheric composition and surface features.",
+                "The committee unanimously agreed to implement the proposed changes to the curriculum after thorough consideration of student feedback.",
+                "Despite encountering numerous obstacles throughout the expedition, the determined team successfully reached the mountain's summit.",
+                "The museum's extensive collection includes remarkably well-preserved artifacts that provide a glimpse into everyday life centuries ago.",
+                "Effective communication requires not only articulating your thoughts clearly but also listening attentively to others' perspectives.",
+                "The documentary highlighted the importance of protecting biodiversity and preserving natural habitats for future generations.",
+                "The revolutionary medical breakthrough offers promising treatment options for patients diagnosed with previously incurable conditions."
+            ]
+        };
+
+        // DOM elements
+        const wordsBtn = document.getElementById('wordsBtn');
+        const sentencesBtn = document.getElementById('sentencesBtn');
+        const textToType = document.getElementById('textToType');
+        const userInput = document.getElementById('userInput');
+        const timer = document.getElementById('timer');
+        const results = document.getElementById('results');
+        const completionTime = document.getElementById('completionTime');
+        const accuracy = document.getElementById('accuracy');
+        const resetBtn = document.getElementById('resetBtn');
+        const easyBtn = document.getElementById('easyBtn');
+        const mediumBtn = document.getElementById('mediumBtn');
+        const hardBtn = document.getElementById('hardBtn');
+
+        // State variables
+        let currentMode = 'words'; // Default to words mode
+        let currentDifficulty = "medium"; // Default difficulty
+        let startTime = null;
+        let timerInterval = null;
+        let currentText = "";
+
+        // Function to set the mode (words or sentences)
+        function setMode(mode) {
+            currentMode = mode;
+
+            // Update button states
+            if (mode === 'words') {
+                wordsBtn.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-white', 'border');
+                wordsBtn.classList.add('bg-primary', 'text-white');
+
+                sentencesBtn.classList.remove('bg-primary', 'text-white');
+                sentencesBtn.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-white', 'border');
+            } else {
+                sentencesBtn.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-white', 'border');
+                sentencesBtn.classList.add('bg-primary', 'text-white');
+
+                wordsBtn.classList.remove('bg-primary', 'text-white');
+                wordsBtn.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-white', 'border');
+            }
+
+            // Reset and generate new text
+            resetPractice();
+            generateText();
+        }
+
+        // Function to set difficulty level
+        function setDifficulty(difficulty) {
+            currentDifficulty = difficulty;
+
+            // Update button states
+            [easyBtn, mediumBtn, hardBtn].forEach(btn => {
+                btn.classList.remove('bg-primary', 'bg-opacity-10', 'font-semibold', 'text-primary');
+                btn.classList.add('hover:bg-gray-100', 'dark:hover:bg-gray-800');
+            });
+
+            if (difficulty === 'easy') {
+                easyBtn.classList.add('bg-primary', 'bg-opacity-10', 'font-semibold', 'text-primary');
+                easyBtn.classList.remove('hover:bg-gray-100', 'dark:hover:bg-gray-800');
+            } else if (difficulty === 'medium') {
+                mediumBtn.classList.add('bg-primary', 'bg-opacity-10', 'font-semibold', 'text-primary');
+                mediumBtn.classList.remove('hover:bg-gray-100', 'dark:hover:bg-gray-800');
+            } else {
+                hardBtn.classList.add('bg-primary', 'bg-opacity-10', 'font-semibold', 'text-primary');
+                hardBtn.classList.remove('hover:bg-gray-100', 'dark:hover:bg-gray-800');
+            }
+
+            // Reset and generate new text if we already have a mode selected
+            if (currentMode) {
+                resetPractice();
+                generateText();
+            }
+        }
+
+        // Function to generate text based on the selected mode
+        function generateText() {
+            if (currentMode === 'words') {
+                const wordSet = words[currentDifficulty];
+                // Select just one random word
+                const randomIndex = Math.floor(Math.random() * wordSet.length);
+                currentText = wordSet[randomIndex];
+            } else if (currentMode === 'sentences') {
+                const sentenceSet = sentences[currentDifficulty];
+                const randomIndex = Math.floor(Math.random() * sentenceSet.length);
+                currentText = sentenceSet[randomIndex];
+            }
+
+            textToType.textContent = currentText;
+            userInput.disabled = false;
+            userInput.value = '';
+            userInput.focus();
+        }
+
+        // Function to start the timer
+        function startTimer() {
+            if (startTime === null) {
+                startTime = Date.now();
+                timerInterval = setInterval(updateTimer, 100);
+            }
+        }
+
+        // Function to update the timer
+        function updateTimer() {
+            const elapsedTime = (Date.now() - startTime) / 1000;
+            timer.textContent = elapsedTime.toFixed(1) + 's';
+        }
+
+        // Function to stop the timer
+        function stopTimer() {
+            clearInterval(timerInterval);
+            const elapsedTime = (Date.now() - startTime) / 1000;
+            return elapsedTime;
+        }
+
+        // Function to calculate accuracy
+        function calculateAccuracy(original, typed) {
+            if (original.length === 0) return 100;
+
+            let correct = 0;
+            for (let i = 0; i < Math.min(original.length, typed.length); i++) {
+                if (original[i] === typed[i]) {
+                    correct++;
+                }
+            }
+
+            return Math.round((correct / original.length) * 100);
+        }
+
+        // Function to show results
+        function showResults(timeElapsed, accuracyPercent) {
+            completionTime.textContent = timeElapsed.toFixed(1) + 's';
+            accuracy.textContent = accuracyPercent + '%';
+            results.classList.remove('hidden');
+            resetBtn.classList.remove('hidden');
+        }
+
+        // Function to reset practice
+        function resetPractice() {
+            clearInterval(timerInterval);
+            startTime = null;
+            timer.textContent = '0.0s';
+            userInput.value = '';
+            results.classList.add('hidden');
+            resetBtn.classList.add('hidden');
+
+            if (currentMode) {
+                generateText();
+            } else {
+                textToType.textContent = 'Select a mode to start typing practice!';
+                userInput.disabled = true;
+            }
+        }
+
+        // Function to highlight mistyped characters
+        function highlightMistakes() {
+            const original = currentText;
+            const typed = userInput.value;
+
+            let htmlContent = '';
+
+            for (let i = 0; i < original.length; i++) {
+                if (i >= typed.length) {
+                    // Not typed yet
+                    htmlContent += `<span class="text-gray-400">${original[i]}</span>`;
+                } else if (original[i] === typed[i]) {
+                    // Correct
+                    htmlContent += `<span class="text-green-500">${original[i]}</span>`;
+                } else {
+                    // Incorrect
+                    htmlContent += `<span class="text-red-500">${original[i]}</span>`;
+                }
+            }
+
+            textToType.innerHTML = htmlContent;
+        }
+
+        // Event Listeners
+        wordsBtn.addEventListener('click', () => setMode('words'));
+        sentencesBtn.addEventListener('click', () => setMode('sentences'));
+        easyBtn.addEventListener('click', () => setDifficulty('easy'));
+        mediumBtn.addEventListener('click', () => setDifficulty('medium'));
+        hardBtn.addEventListener('click', () => setDifficulty('hard'));
+
+        userInput.addEventListener('input', () => {
+            if (startTime === null) {
+                startTimer();
+            }
+
+            highlightMistakes();
+
+            // Check if completed
+            if (userInput.value === currentText) {
+                const timeElapsed = stopTimer();
+                const accuracyPercent = calculateAccuracy(currentText, userInput.value);
+                showResults(timeElapsed, accuracyPercent);
+                userInput.disabled = true;
+            }
+        });
+
+        resetBtn.addEventListener('click', resetPractice);
+
+        // Initialize with words mode
+        setMode('words');
+    </script>
+    <p>
+        <center><button onclick="history.back()">Go Back</button></center>
+</body>
+
+</html>

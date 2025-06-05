@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Scientific Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        h1 {
+            color: #fff;
+            text-shadow: 2px 2px 8px #0008;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+        }
+
+        .calculator {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            padding: 30px 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .display {
+            width: 320px;
+            height: 50px;
+            background: #222;
+            color: #0ff;
+            font-size: 2rem;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: right;
+            padding: 10px 15px;
+            box-shadow: 0 2px 8px #0004;
+            letter-spacing: 1px;
+            overflow-x: auto;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(6, 55px);
+            gap: 12px;
+        }
+
+        button {
+            height: 45px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 2px 6px #0002;
+        }
+
+        button.operator {
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            color: #1e3c72;
+        }
+
+        button.equal {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+            color: #fff;
+            grid-column: span 2;
+        }
+
+        button:active {
+            transform: scale(0.96);
+            background: #fff7;
+        }
+
+        @media (max-width: 600px) {
+
+            .display,
+            .buttons {
+                width: 95vw;
+                min-width: 0;
+            }
+
+            .buttons {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Scientific Calculator</h1>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button onclick="input('7')">7</button>
+            <button onclick="input('8')">8</button>
+            <button onclick="input('9')">9</button>
+            <button class="operator" onclick="input('/')">÷</button>
+            <button class="operator" onclick="input('^')">xʸ</button>
+            <button class="operator" onclick="input('sqrt(')">√</button>
+
+            <button onclick="input('4')">4</button>
+            <button onclick="input('5')">5</button>
+            <button onclick="input('6')">6</button>
+            <button class="operator" onclick="input('*')">×</button>
+            <button class="operator" onclick="input('(')">(</button>
+            <button class="operator" onclick="input(')')">)</button>
+
+            <button onclick="input('1')">1</button>
+            <button onclick="input('2')">2</button>
+            <button onclick="input('3')">3</button>
+            <button class="operator" onclick="input('-')">−</button>
+            <button class="operator" onclick="input('sin(')">sin</button>
+            <button class="operator" onclick="input('cos(')">cos</button>
+
+            <button onclick="input('0')">0</button>
+            <button onclick="input('.')">.</button>
+            <button onclick="clearDisplay()">C</button>
+            <button class="operator" onclick="input('+')">+</button>
+            <button class="operator" onclick="input('tan(')">tan</button>
+            <button class="operator" onclick="input('log(')">log</button>
+
+            <button class="operator" onclick="input('pi')">π</button>
+            <button class="operator" onclick="input('e')">e</button>
+            <button class="operator" onclick="input('ln(')">ln</button>
+            <button class="operator" onclick="input('!')">n!</button>
+            <button class="equal" onclick="calculate()">=</button>
+        </div>
+    </div>
+    <script>
+        let display = document.getElementById('display');
+        let expr = '';
+
+        function input(val) {
+            if (expr === 'Error') expr = '';
+            if (val === 'pi') val = 'π';
+            if (val === 'e') val = 'e';
+            expr += val;
+            display.textContent = expr;
+        }
+
+        function clearDisplay() {
+            expr = '';
+            display.textContent = '0';
+        }
+
+        function calculate() {
+            try {
+                let toEval = expr
+                    .replace(/π/g, 'Math.PI')
+                    .replace(/e/g, 'Math.E')
+                    .replace(/sin\(/g, 'Math.sin(')
+                    .replace(/cos\(/g, 'Math.cos(')
+                    .replace(/tan\(/g, 'Math.tan(')
+                    .replace(/log\(/g, 'Math.log10(')
+                    .replace(/ln\(/g, 'Math.log(')
+                    .replace(/sqrt\(/g, 'Math.sqrt(')
+                    .replace(/(\d+)!/g, (m, n) => `factorial(${n})`)
+                    .replace(/(\d+(\.\d+)?)\^(\d+(\.\d+)?)/g, (m, a, _, b) => `Math.pow(${a},${b})`);
+                // Handle x^y
+                toEval = toEval.replace(/([0-9.]+)\^([0-9.]+)/g, 'Math.pow($1,$2)');
+                // Factorial function
+                function factorial(n) {
+                    n = Number(n);
+                    if (n < 0) return NaN;
+                    if (n === 0 || n === 1) return 1;
+                    let res = 1;
+                    for (let i = 2; i <= n; i++) res *= i;
+                    return res;
+                }
+                // eslint-disable-next-line no-new-func
+                let result = Function('factorial', 'return ' + toEval)(factorial);
+                display.textContent = result;
+                expr = '' + result;
+            } catch (e) {
+                display.textContent = 'Error';
+                expr = '';
+            }
+        }
+    </script><p>
+    <center><button onclick="history.back()">Go Back</button></center>
+</body>
+
+</html>
